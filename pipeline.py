@@ -114,6 +114,29 @@ def extract_view_spherical(img, yaw_deg, pitch_deg=-10, fov_deg=90, out_size=409
                        interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_WRAP)
     return persp
 
+def interpolate_path(coords, step_meters=5):
+    points = []
+    for i in range(len(coords)-1):
+        lat1, lon1 = coords[i]
+        lat2, lon2 = coords[i+1]
+
+        # Haversine distance
+        R = 6371000
+        dlat = math.radians(lat2-lat1)
+        dlon = math.radians(lon2-lon1)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1))*math.cos(math.radians(lat2))*math.sin(dlon/2)**2
+        c = 2*math.atan2(math.sqrt(a), math.sqrt(1-a))
+        dist = R * c
+
+        steps = max(1, int(dist/step_meters))
+        for s in range(steps):
+            f = s/steps
+            lat = lat1 + f*(lat2-lat1)
+            lon = lon1 + f*(lon2-lon1)
+            points.append((lat, lon))
+    points.append(coords[-1])
+    return points
+    
 def parse_kml_points(kml_file):
     doc = minidom.parse(kml_file)
     coords = []
