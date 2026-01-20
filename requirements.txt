@@ -5,3 +5,6 @@ pillow
 piexif
 torch
 torchvision
+streamlit
+folium
+streamlit-folium
